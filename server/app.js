@@ -15,7 +15,7 @@ let users = {};
 io.on("connection", (client) => {
   console.log(`Connection ${client.id}`);
   users[client.id] = "Anonim";
-  broadcast("users", users);
+  my_broadcast("users", users);
 
   // new user
   client.on("change:name", (name) => {
