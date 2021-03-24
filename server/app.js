@@ -13,6 +13,7 @@ app.use("*", (req, res) => {
 let users = {};
 
 io.on("connection", (client) => {
+  console.log(`Connection ${client.id}`);
   users[client.id] = "Anonim";
   broadcast("users", users);
 
