@@ -5,6 +5,7 @@ import "./Chat.css";
 import { socket } from "./socket";
 
 export default class Chat extends Component {
+  socket = socket;
   state = {
     currentUser: "",
     messages: [],
@@ -13,12 +14,46 @@ export default class Chat extends Component {
     users: {},
   };
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.socket.on("message", (data) => {
+      if (this.state.isLogin) {
+        this.setState(({ messages }) => {
+          const newMessages = [...messages];
+          if (newMessages.length > 50) {
+            newMessages.shift();
+          }
+          return {
+            messages: [...newMessages, { user: data.user, text: data.message }],
+          };
+        });
+      }
+    });
+    this.socket.on("users", (data) => {
+      this.setState({ users: data });
+    });
+  }
+
+  changeMessage = (e) => {
+    this.setState({ message: e.target.value });
+  };
+
+  sendMessage = (e) => {
+    e.preventDefault();
+    const { currentUser, message } = this.state;
+    if (message.trim().length) {
+      this.socket.emit("message", {
+        user: currentUser,
+        message: message.trim(),
+      });
+      this.setState({ message: "" });
+    }
+  };
 
   inputName = () => {
     const user = this.state.currentUser;
     if (user !== "") {
       this.setState({ currentUser: user, isLogin: true });
+      this.socket.emit("change:name", user);
     }
   };
 
